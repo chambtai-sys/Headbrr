@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Headbrr | Pro Headphone Tester</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap');
+        
+        :root {
+            --brand: #ff0055;
+            --brand-glow: rgba(255, 0, 85, 0.4);
+        }
+        
+        body { 
+            font-family: 'Outfit', sans-serif;
+            background-color: #050505;
+            color: #e2e8f0;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-action { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-action:active { transform: scale(0.95); }
+        .vu-meter { height: 4px; background: #1e1e1e; border-radius: 2px; overflow: hidden; position: relative; }
+        .vu-bar { height: 100%; width: 0%; background: var(--brand); transition: width 0.1s ease; }
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { height: 4px; background: #2d2d2d; border-radius: 2px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: var(--brand); cursor: pointer; margin-top: -6px; box-shadow: 0 0 10px var(--brand-glow); }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-12">
+    <div class="max-w-5xl mx-auto">
+        <header class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+            <div>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 bg-gradient-to-tr from-pink-600 to-rose-400 rounded-xl flex items-center justify-center shadow-lg shadow-rose-900/20">
+                        <i data-lucide="headphones" class="text-white"></i>
+                    </div>
+                    <h1 class="text-4xl font-extrabold tracking-tighter italic">HEADBRR</h1>
+                </div>
+                <p class="text-zinc-500 font-medium uppercase tracking-widest text-xs">Linux Localhost Edition // v1.0.0</p>
+            </div>
+            <div class="glass px-6 py-3 rounded-2xl flex items-center gap-8">
+                <div class="flex flex-col gap-1">
+                    <span class="text-[10px] uppercase font-bold text-zinc-600 tracking-wider">Output Signal</span>
+                    <div class="vu-meter w-32"><div id="vu-l" class="vu-bar"></div></div>
+                    <div class="vu-meter w-32"><div id="vu-r" class="vu-bar"></div></div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] uppercase font-bold text-zinc-600 tracking-wider mb-1">Master Volume</span>
+                    <input type="range" id="master-vol" min="0" max="1" step="0.01" value="0.5" class="w-32">
+                </div>
+            </div>
+        </header>
+        <main class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <section class="md:col-span-4 space-y-6">
+                <div class="glass p-6 rounded-3xl">
+                    <h2 class="text-sm font-bold uppercase text-zinc-400 mb-6 flex items-center gap-2"><i data-lucide="split" size="16"></i> Channel Check</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="playChannel('left')" class="btn-action glass hover:bg-zinc-800/50 p-6 rounded-2xl flex flex-col items-center gap-3 border-l-4 border-l-zinc-700"><i data-lucide="arrow-left-to-line" class="text-zinc-400"></i><span class="text-xs font-bold">LEFT</span></button>
+                        <button onclick="playChannel('right')" class="btn-action glass hover:bg-zinc-800/50 p-6 rounded-2xl flex flex-col items-center gap-3 border-r-4 border-r-zinc-700"><i data-lucide="arrow-right-to-line" class="text-zinc-400"></i><span class="text-xs font-bold">RIGHT</span></button>
+                    </div>
+                    <button onclick="stopAll()" class="w-full mt-4 bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 py-3 rounded-xl text-xs font-bold uppercase tracking-widest">Mute All</button>
+                </div>
+                <div class="glass p-6 rounded-3xl">
+                    <h2 class="text-sm font-bold uppercase text-zinc-400 mb-6 flex items-center gap-2"><i data-lucide="waves" size="16"></i> Noise Floor</h2>
+                    <div class="space-y-3">
+                        <button onclick="playNoise('white')" id="btn-white" class="btn-action w-full glass hover:bg-zinc-800/50 p-4 rounded-xl flex justify-between items-center px-6"><span class="text-sm font-semibold">White Noise</span><div class="w-2 h-2 rounded-full bg-zinc-700 status-dot"></div></button>
+                        <button onclick="playNoise('pink')" id="btn-pink" class="btn-action w-full glass hover:bg-zinc-800/50 p-4 rounded-xl flex justify-between items-center px-6"><span class="text-sm font-semibold">Pink Noise</span><div class="w-2 h-2 rounded-full bg-zinc-700 status-dot"></div></button>
+                    </div>
+                </div>
+            </section>
+            <section class="md:col-span-8 space-y-6">
+                <div class="glass p-8 rounded-3xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-8 opacity-10 pointer-events-none"><i data-lucide="activity" size="120"></i></div>
+                    <h2 class="text-sm font-bold uppercase text-zinc-400 mb-8 flex items-center gap-2"><i data-lucide="audio-lines" size="16"></i> Frequency Analysis</h2>
+                    <div class="flex items-center justify-between mb-12"><div class="text-center flex-1"><span class="text-7xl font-black italic tracking-tighter mono" id="freq-display">0.00</span><span class="text-xl font-bold text-rose-500 italic ml-2">Hz</span></div></div>
+                    <div class="space-y-8">
+                        <div><div class="flex justify-between text-[10px] uppercase font-bold text-zinc-500 mb-2 tracking-widest"><span>20 Hz</span><span>10 kHz</span><span>20 kHz</span></div><input type="range" id="freq-slider" min="20" max="20000" step="1" value="440" class="w-full"></div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <button onclick="setFreq(20)" class="glass hover:bg-zinc-800/50 py-3 rounded-xl text-[10px] font-bold">SUB-BASS (20Hz)</button>
+                            <button onclick="setFreq(60)" class="glass hover:bg-zinc-800/50 py-3 rounded-xl text-[10px] font-bold">KICK (60Hz)</button>
+                            <button onclick="setFreq(1000)" class="glass hover:bg-zinc-800/50 py-3 rounded-xl text-[10px] font-bold">MIDS (1kHz)</button>
+                            <button onclick="setFreq(15000)" class="glass hover:bg-zinc-800/50 py-3 rounded-xl text-[10px] font-bold">AIR (15kHz)</button>
+                        </div>
+                    </div>
+                    <div class="mt-12 flex gap-4">
+                        <button id="toggle-sine" onclick="toggleSine()" class="flex-1 bg-white text-black py-4 rounded-2xl font-black italic uppercase tracking-tighter hover:bg-rose-500 hover:text-white transition-all shadow-xl shadow-rose-900/10">START SIGNAL</button>
+                        <button id="sweep-btn" onclick="startSweep()" class="px-8 glass hover:bg-zinc-800 rounded-2xl flex items-center justify-center group"><i data-lucide="play" class="group-hover:text-rose-500 transition-colors"></i><span class="ml-3 text-xs font-bold uppercase tracking-widest">Sweep</span></button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass p-6 rounded-3xl">
+                        <h3 class="text-[10px] font-bold uppercase text-zinc-500 mb-4 tracking-widest">Polarity / Phase</h3>
+                        <p class="text-xs text-zinc-400 mb-4 leading-relaxed">Check if your drivers are wired correctly. "In-Phase" should sound centered. "Out-of-Phase" should sound hollow and wide.</p>
+                        <div class="flex gap-2"><button onclick="playPhase('in')" class="flex-1 py-3 glass rounded-xl text-[10px] font-bold uppercase">In-Phase</button><button onclick="playPhase('out')" class="flex-1 py-3 glass rounded-xl text-[10px] font-bold uppercase">Out-Phase</button></div>
+                    </div>
+                    <div class="glass p-6 rounded-3xl border-2 border-dashed border-zinc-800/50 flex flex-col items-center justify-center text-center"><i data-lucide="shield-check" class="text-zinc-700 mb-2"></i><span class="text-[10px] font-bold uppercase text-zinc-600 tracking-widest italic leading-tight">Linux Certified<br>Audio Engine</span></div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script>
+        lucide.createIcons();
+        let audioCtx = null, masterGain = null, oscillator = null, noiseNode = null, isSineRunning = false, currentNoise = null, analyser = null;
+        function initAudio() {
+            if (audioCtx) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            masterGain = audioCtx.createGain();
+            masterGain.gain.value = document.getElementById('master-vol').value;
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 256;
+            masterGain.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            updateVU();
+        }
+        function updateVU() {
+            if (!analyser) return;
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(dataArray);
+            let average = 0;
+            for (let i = 0; i < dataArray.length; i++) average += dataArray[i];
+            average = average / dataArray.length;
+            const volPercent = (average / 255) * 100;
+            document.getElementById('vu-l').style.width = volPercent + '%';
+            document.getElementById('vu-r').style.width = volPercent + '%';
+            requestAnimationFrame(updateVU);
+        }
+        document.getElementById('master-vol').oninput = (e) => { if (masterGain) masterGain.gain.setTargetAtTime(e.target.value, audioCtx.currentTime, 0.05); };
+        function setFreq(f) { document.getElementById('freq-slider').value = f; updateFreqUI(f); }
+        function updateFreqUI(f) {
+            document.getElementById('freq-display').innerText = parseFloat(f).toFixed(2);
+            if (oscillator) oscillator.frequency.setTargetAtTime(f, audioCtx.currentTime, 0.05);
+        }
+        document.getElementById('freq-slider').oninput = (e) => updateFreqUI(e.target.value);
+        function toggleSine() {
+            initAudio();
+            const btn = document.getElementById('toggle-sine');
+            if (isSineRunning) {
+                oscillator.stop(); oscillator = null; isSineRunning = false;
+                btn.innerText = 'START SIGNAL'; btn.classList.remove('bg-rose-500', 'text-white'); btn.classList.add('bg-white', 'text-black');
+            } else {
+                stopAll();
+                oscillator = audioCtx.createOscillator(); oscillator.type = 'sine';
+                oscillator.frequency.value = document.getElementById('freq-slider').value;
+                oscillator.connect(masterGain); oscillator.start(); isSineRunning = true;
+                btn.innerText = 'STOP SIGNAL'; btn.classList.add('bg-rose-500', 'text-white'); btn.classList.remove('bg-white', 'text-black');
+            }
+        }
+        function playChannel(side) {
+            initAudio(); stopAll();
+            const panner = audioCtx.createStereoPanner();
+            panner.pan.value = side === 'left' ? -1 : 1;
+            const osc = audioCtx.createOscillator(); osc.frequency.value = 440;
+            osc.connect(panner).connect(masterGain); osc.start();
+            setTimeout(() => osc.stop(), 1000);
+        }
+        function playNoise(type) {
+            initAudio(); stopAll();
+            if (currentNoise === type) { currentNoise = null; return; }
+            const bufferSize = 2 * audioCtx.sampleRate;
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            if (type === 'white') { for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1; }
+            else {
+                let b0, b1, b2, b3, b4, b5, b6; b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0;
+                for (let i = 0; i < bufferSize; i++) {
+                    let white = Math.random() * 2 - 1;
+                    b0 = 0.99886 * b0 + white * 0.0555179; b1 = 0.99332 * b1 + white * 0.0750759; b2 = 0.96900 * b2 + white * 0.1538520; b3 = 0.86650 * b3 + white * 0.3104856; b4 = 0.55000 * b4 + white * 0.5329522; b5 = -0.7616 * b5 - white * 0.0168980;
+                    output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362; output[i] *= 0.11; b6 = white * 0.115926;
+                }
+            }
+            noiseNode = audioCtx.createBufferSource(); noiseNode.buffer = noiseBuffer; noiseNode.loop = true; noiseNode.connect(masterGain); noiseNode.start(); currentNoise = type;
+            document.getElementById(`btn-${type}`).querySelector('.status-dot').classList.add('bg-rose-500');
+        }
+        function playPhase(mode) {
+            initAudio(); stopAll();
+            const oscL = audioCtx.createOscillator(), oscR = audioCtx.createOscillator(), merger = audioCtx.createChannelMerger(2), invert = audioCtx.createGain();
+            oscL.frequency.value = oscR.frequency.value = 220;
+            if (mode === 'out') { invert.gain.value = -1; oscR.connect(invert).connect(merger, 0, 1); } else { oscR.connect(merger, 0, 1); }
+            oscL.connect(merger, 0, 0); merger.connect(masterGain);
+            oscL.start(); oscR.start(); setTimeout(() => { oscL.stop(); oscR.stop(); }, 2000);
+        }
+        function startSweep() {
+            initAudio(); stopAll();
+            const osc = audioCtx.createOscillator();
+            osc.frequency.setValueAtTime(20, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(20000, audioCtx.currentTime + 10);
+            osc.connect(masterGain); osc.start();
+            const interval = setInterval(() => {
+                document.getElementById('freq-display').innerText = osc.frequency.value.toFixed(2);
+                document.getElementById('freq-slider').value = osc.frequency.value;
+            }, 50);
+            setTimeout(() => { osc.stop(); clearInterval(interval); updateFreqUI(20000); }, 10050);
+        }
+        function stopAll() {
+            if (oscillator) { oscillator.stop(); oscillator = null; }
+            if (noiseNode) { noiseNode.stop(); noiseNode = null; }
+            isSineRunning = false; currentNoise = null;
+            const btn = document.getElementById('toggle-sine');
+            btn.innerText = 'START SIGNAL'; btn.classList.remove('bg-rose-500', 'text-white'); btn.classList.add('bg-white', 'text-black');
+            document.querySelectorAll('.status-dot').forEach(d => d.className = 'w-2 h-2 rounded-full bg-zinc-700 status-dot');
+        }
+    </script>
+</body>
+</html>
