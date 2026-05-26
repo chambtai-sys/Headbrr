@@ -8,6 +8,9 @@
 
 HEADBRR is a minimalist, studio-grade audio diagnostic tool designed to test headphone frequency response, channel balance, driver phase, and noise floor. It runs as a local web server for maximum performance and cross-platform compatibility on Linux.
 
+> [!NOTE]
+> **Headcode (Terminal Version)** is coming soon! A pure CLI implementation of Headbrr for terminal power users.
+
 ## ✨ Features
 
 - **📡 Frequency Analysis**: Pure sine wave generation from 20Hz to 20kHz with real-time HUD.
