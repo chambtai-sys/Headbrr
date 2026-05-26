@@ -9,7 +9,7 @@
 HEADBRR is a minimalist, studio-grade audio diagnostic tool designed to test headphone frequency response, channel balance, driver phase, and noise floor. It runs as a local web server for maximum performance and cross-platform compatibility on Linux.
 
 > [!NOTE]
-> **Headcode** is coming soon! A pure CLI implementation of Headbrr for terminal power users.
+> **Headcode (Terminal Version)** is coming soon! A pure CLI implementation of Headbrr for terminal power users.
 
 ## ✨ Features
 
@@ -55,3 +55,17 @@ Headbrr/
 ## 📜 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🚀 Release Notes: Headbrr POWER
+
+**Headbrr POWER** has been officially released! ⚡
+
+This is the definitive terminal-native port for Microsoft PowerShell users. While the original Headbrr provides a high-fidelity web HUD, **Headbrr POWER** leverages pure .NET PCM synthesis to bring studio-grade diagnostics directly to the Windows terminal.
+
+### 🔑 Key Differences
+- **Native Execution**: No browser or local server required.
+- **In-Memory Synthesis**: Generates raw 16-bit PCM streams without writing a single file.
+- **PowerShell Optimized**: Features a built-in `hb` alias and interactive terminal UI.
+- **Zero Dependencies**: Works out-of-the-box on any modern Windows system with PowerShell.
+
+Check it out here: [chambtai-sys/Headbrr-POWER](https://github.com/chambtai-sys/Headbrr-POWER)
